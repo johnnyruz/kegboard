@@ -22,7 +22,10 @@
 #define KB_ENABLE_PARALLAX_RFID_LEGACY_TAGS 0
 
 // Enable ID-12 RFID?
-#define KB_ENABLE_ID12_RFID 1
+#define KB_ENABLE_ID12_RFID 0
+
+// Enable MFRC522 SPI RFID
+#define KB_ENABLE_MFRC522_RFID 1
 
 // Enable Wiegand RFID reader?
 // Note: Must set KB_ENABLE_ID12_RFID to 0 if enabling this.
@@ -44,10 +47,10 @@
 #undef KB_ENABLE_ID12_RFID
 #undef KB_ENABLE_CHIP_LED
 #undef KB_ENABLE_SELFTEST
-#define KB_ENABLE_BUZZER 0
+#define KB_ENABLE_BUZZER 1
 #define KB_ENABLE_ID12_RFID 0
 #define KB_ENABLE_CHIP_LED 1
-#define KB_ENABLE_SELFTEST 0
+#define KB_ENABLE_SELFTEST 1
 #endif
 
 //
@@ -91,7 +94,11 @@
 #define KB_PIN_SERIAL_RFID_RX     6
 #define KB_PIN_ONEWIRE_THERMO     7
 #define KB_PIN_ONEWIRE_PRESENCE   8
+#if KB_ENABLE_MFRC522_RFID
+#define KB_PIN_MFRC522_SS         9
+#else
 #define KB_PIN_LED_CHIP           9
+#endif
 #define KB_PIN_RFID_RESET         10
 #define KB_PIN_BUZZER             11
 #define KB_PIN_TEST_PULSE         12
@@ -143,8 +150,8 @@
 // Error checking
 //
 
-#if (KB_ENABLE_ID12_RFID + KB_ENABLE_WIEGAND_RFID + KB_ENABLE_PARALLAX_RFID) > 1
+#if (KB_ENABLE_ID12_RFID + KB_ENABLE_WIEGAND_RFID + KB_ENABLE_PARALLAX_RFID + KB_ENABLE_MFRC522_RFID) > 1
 // TODO(mikey): work around pin change interrupt sharing issues.
-#error "ID12 RFID and WIEGAND RFID cannot be used together."
-#error "Please disable one of them in kegboard_config.h"
+#error "ID12 RFID, MFRC522 RFID, and WIEGAND RFID cannot be used together."
+#error "Please disable all but one of them in kegboard_config.h"
 #endif

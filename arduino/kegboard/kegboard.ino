@@ -62,6 +62,12 @@
 #include "tones.h"
 #endif
 
+#if KB_ENABLE_MFRC522_RFID
+#include <SPI.h>
+#include "RFID.h"
+RFID rfid(KB_PIN_MFRC522_SS,KB_PIN_RFID_RESET);
+#endif
+
 #if KB_ENABLE_ID12_RFID
 #include <SoftwareSerial.h>
 static SoftwareSerial gSerialRfid(KB_PIN_SERIAL_RFID_RX, -1);
@@ -346,7 +352,12 @@ void writeMeterPacket(int channel)
       break;
   }
 
+  //Update (channel + x) for multiple kegboards where x is 2 times the number of the kegboard
+  //using 0-based counting. I.E. your second kegboard would be +2, third would be +4, etc.
+  //MAX number of kegboards is 5 or (channel + 8)
+  
   name[4] = 0x30 + channel;
+  //name[4] = 0x30 + (channel + 2);
   KegboardPacket packet;
   packet.SetType(KBM_METER_STATUS);
   packet.AddTag(KBM_METER_STATUS_TAG_METER_NAME, 5, name);
@@ -508,6 +519,11 @@ void setup()
   gLastWiegandInterruptMillis = 0;
 #endif
 
+#if KB_ENABLE_MFRC522_RFID
+  SPI.begin();
+  rfid.init();
+#endif
+
   writeHelloPacket();
 }
 
@@ -631,6 +647,20 @@ static void readSerialBytes(char *dest_buf, int num_bytes, int offset) {
     dest_buf[offset++] = Serial.read();
   }
 }
+
+#if KB_ENABLE_MFRC522_RFID
+static void doProcessMfrcRfid() {
+  if(rfid.isCard()){
+    
+        if(rfid.readCardSerial()){
+              writeAuthPacket("core.rfid", rfid.serNum, 5, 1);
+              writeAuthPacket("core.rfid", rfid.serNum, 5, 0);
+        }
+  }
+
+  rfid.halt();
+}
+#endif
 
 #if KB_ENABLE_ID12_RFID
 static void doProcessRfid() {
@@ -1019,6 +1049,10 @@ void loop()
 
 #if KB_ENABLE_WIEGAND_RFID
   doProcessWiegand();
+#endif
+
+#if KB_ENABLE_MFRC522_RFID
+  doProcessMfrcRfid();
 #endif
 
 #if KB_ENABLE_SELFTEST
