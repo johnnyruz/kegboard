@@ -9,7 +9,7 @@
 #define KB_ENABLE_ONEWIRE_THERMO   1
 
 // Check for & report 1-wire devices on the ID bus?
-#define KB_ENABLE_ONEWIRE_PRESENCE 1
+#define KB_ENABLE_ONEWIRE_PRESENCE 0
 
 // Enable a selftest pulse?
 #define KB_ENABLE_SELFTEST  1
@@ -82,6 +82,36 @@
 //   A5 - gpio pin B
 //
 
+//
+// Pin configuration - KEGBOARD WITH MFRC522 RFID ENABLED
+//
+
+// On Arduino Uno, some of the pins are used for the SPI Interface
+// so they cannot be used for other functions. Arduino Mega SPI pins
+// do not conflict
+//
+//  Digital pin allocation:
+//    2 - flowmeter 0 pulse (input)
+//    3 - flowmeter 1 pulse (input)
+//    4 - flow 0 LED (output)
+//    5 - flow 1 LED (output)
+//    6 - rfid (input from ID-12)
+//    7 - thermo onewire bus (1-wire, input/output)
+//    8 - presence onewire bus (1-wire, input/output)
+//    9 - mfrc522 SS/SDA pin
+//   10 - rfid reset
+//   11 - Arduino Uno SPI MOSI
+//   12 - Arduino Uno SPI MISO
+//   13 - Arduino Uno SPI SCK
+//  Analog pin allocation:
+//   A0 - relay 0 control (output)
+//   A1 - relay 1 control (output)
+//   A2 - relay 2 control (output)
+//   A3 - relay 3 control (output)
+//   A4 - gpio pin A
+//   A5 - gpio pin B
+//
+
 #define KB_PIN_METER_A            2
 //Parallax RFID needs two IO pins, using flow meter B's by default
 #if KB_ENABLE_PARALLAX_RFID
@@ -94,15 +124,26 @@
 #define KB_PIN_SERIAL_RFID_RX     6
 #define KB_PIN_ONEWIRE_THERMO     7
 #define KB_PIN_ONEWIRE_PRESENCE   8
+
 #if KB_ENABLE_MFRC522_RFID
 #define KB_PIN_MFRC522_SS         9
+#define KB_PIN_LED_CHIP           0
 #else
 #define KB_PIN_LED_CHIP           9
 #endif
+
 #define KB_PIN_RFID_RESET         10
+
+#if KB_ENABLE_MFRC522_RFID && !( defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) ) 
+#define KB_PIN_BUZZER             0
+#define KB_PIN_TEST_PULSE         0
+#define KB_PIN_ALARM              0
+#else
 #define KB_PIN_BUZZER             11
 #define KB_PIN_TEST_PULSE         12
 #define KB_PIN_ALARM              13
+#endif
+
 #define KB_PIN_RELAY_A            A0
 #define KB_PIN_RELAY_B            A1
 #define KB_PIN_RELAY_C            A2
